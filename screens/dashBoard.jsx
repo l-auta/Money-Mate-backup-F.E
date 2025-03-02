@@ -1,10 +1,26 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionCards from "../components/transactionCards";
-import TransactionList from "../components/highTransactions";
-import React from "react";
+import TransactionTable from '../components/TransactionTable';
+import MoneyChart from "../components/MoneyChart";
+import React, { useState, useEffect } from "react";
 
 function Dashboard() {
+  // State to store parsed transactions
+  const [transactions, setTransactions] = useState([]);
+
+  // Simulate fetching M-Pesa messages (replace with actual parsed data)
+  useEffect(() => {
+    const sampleTransactions = [
+      { id: 1, amount: 1000, type: 'received', date: '2023-01-10' },
+      { id: 2, amount: 500, type: 'sent', date: '2023-02-15' },
+      { id: 3, amount: 2000, type: 'received', date: '2023-02-20' },
+      { id: 4, amount: 1500, type: 'sent', date: '2023-03-25' },
+      { id: 5, amount: 300, type: 'received', date: '2023-04-05' },
+    ];
+    setTransactions(sampleTransactions);
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -19,18 +35,22 @@ function Dashboard() {
           <TransactionCards />
         </View>
 
-        {/* Chart Section */}
+        {/* Transaction Table */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Transaction History:</Text>
+          <TransactionTable />
+        </View>
+
+        {/* Money In/Out Chart */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Transaction Breakdown:</Text>
-          <View style={styles.chartPlaceholder}>
-            <Text style={styles.chartText}>Chart Placeholder</Text>
-          </View>
+          <MoneyChart transactions={transactions} />
         </View>
 
         {/* Top Transactions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Top Highest Transactions:</Text>
-          <TransactionList />
+          <TransactionTable />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -70,17 +90,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#6d2323', // Primary color
     marginBottom: 15,
-  },
-  chartPlaceholder: {
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5', // Light gray background for chart placeholder
-    borderRadius: 10,
-  },
-  chartText: {
-    fontSize: 18,
-    color: '#a04747', // Secondary color
   },
 });
 

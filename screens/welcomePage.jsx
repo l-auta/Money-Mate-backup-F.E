@@ -24,11 +24,8 @@ function Welcome({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {/* App Name with a Modern Touch */}
         <Text style={styles.title}>Money Mate</Text>
-        {/* Subtle Design Element */}
         <View style={styles.line} />
-        {/* Tagline */}
         <Text style={styles.tagline}>
           Track your expenses effortlessly and take control of your finances.
         </Text>
