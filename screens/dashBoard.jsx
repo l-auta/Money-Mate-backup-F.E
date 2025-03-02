@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionCards from "../components/transactionCards";
-import TransactionList from "../components/highTransactions";
+import TransactionTable from '../components/TransactionTable';
 import React from "react";
 
 function Dashboard() {
@@ -17,6 +17,12 @@ function Dashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Transactions:</Text>
           <TransactionCards />
+        </View>
+        
+        {/* Transaction Table */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Transaction History:</Text>
+          <TransactionTable />
         </View>
 
         {/* Chart Section */}
