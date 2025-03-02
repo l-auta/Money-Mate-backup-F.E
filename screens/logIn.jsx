@@ -14,7 +14,7 @@ const LogIn = ({ navigation }) => {
       return;
     }
 
-    navigation.replace('Main'); // Navigate to the main screen after login
+    navigation.replace('MainPage'); // Navigate to the main screen after login
 
     console.log('Form Submitted with Username: ', username);
     console.log('Form Submitted with Password: ', password);
