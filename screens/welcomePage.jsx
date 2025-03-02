@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Animated, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, Animated, SafeAreaView } from "react-native";
 import React, { useEffect } from "react";
 
 function Welcome({ navigation }) {
@@ -13,22 +13,26 @@ function Welcome({ navigation }) {
       useNativeDriver: true,
     }).start();
 
-    // Redirect to main app page after 2.5 seconds
+    // Redirect to SignUp screen after 2.5 seconds
     const timer = setTimeout(() => {
-      navigation.replace('SignUp'); // Replace 'SignUp' with your main screen route name
-    }, 2500); // Duration for splash screen to show
+      navigation.replace('SignUp');
+    }, 2500);
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, [fadeAnim, navigation]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <Text style={styles.text}>Money Mate</Text>
-          <Text style={styles.about}>Track your expenses effortlessly and take control of your finances.</Text>
-        </Animated.View>
-      </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+        {/* App Name with a Modern Touch */}
+        <Text style={styles.title}>Money Mate</Text>
+        {/* Subtle Design Element */}
+        <View style={styles.line} />
+        {/* Tagline */}
+        <Text style={styles.tagline}>
+          Track your expenses effortlessly and take control of your finances.
+        </Text>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -38,21 +42,31 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#f5cca0'
+    backgroundColor: '#f5f5f5', // Light background for contrast
   },
-  text: {
-    fontSize: 55,
-    color: '#6d2323',
+  content: {
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 42,
     fontWeight: 'bold',
-    marginTop: 50,
-    textAlign: 'center',
+    color: '#6d2323', // Primary color
+    marginBottom: 10,
+    textTransform: 'uppercase', // Uppercase for a modern look
+    letterSpacing: 2, // Add spacing between letters
   },
-  about: {
-    fontSize: 25,
+  line: {
+    width: 100,
+    height: 4,
+    backgroundColor: '#6d2323', // Primary color
     marginBottom: 20,
-    // marginLeft : 30,
-    color: '#a04747',
-    // fontWeight : 'bold',
+  },
+  tagline: {
+    fontSize: 18,
+    color: '#a04747', // Secondary color
+    textAlign: 'center',
+    paddingHorizontal: 40,
+    lineHeight: 24, // Improve readability
   },
 });
 
