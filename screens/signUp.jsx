@@ -33,13 +33,13 @@ function SignUp({ navigation }) {
         {/* Sign Up Button */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('Home')} // Replace 'Home' with your main screen
+          onPress={() => navigation.navigate('LogIn')} // Replace 'Home' with your main screen
         >
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
 
         {/* Login Link */}
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => navigation.navigate('LogIn')}>
           <Text style={styles.loginText}>
             Already have an account? <Text style={styles.loginLink}>Log In</Text>
           </Text>
