@@ -13,18 +13,21 @@ function SignUp({ navigation }) {
           style={styles.input}
           placeholder="Full Name"
           placeholderTextColor="#999"
+          color="#333" // Set text color for user input
         />
         <TextInput
           style={styles.input}
           placeholder="Email"
           placeholderTextColor="#999"
           keyboardType="email-address"
+          color="#333" // Set text color for user input
         />
         <TextInput
           style={styles.input}
           placeholder="Password"
           placeholderTextColor="#999"
           secureTextEntry
+          color="#333" // Set text color for user input
         />
 
         {/* Sign Up Button */}
@@ -71,6 +74,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontSize: 16,
     backgroundColor: '#fff', // White background for inputs
+    color: '#333', // Text color for user input
   },
   button: {
     backgroundColor: '#6d2323', // Primary color
