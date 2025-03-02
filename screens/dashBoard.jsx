@@ -3,6 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionCards from "../components/transactionCards";
 import TransactionTable from '../components/TransactionTable';
 import MoneyChart from "../components/MoneyChart";
+import HighTransaction from "../components/highTransactions"
 import React, { useState, useEffect } from "react";
 
 function Dashboard() {
@@ -50,7 +51,7 @@ function Dashboard() {
         {/* Top Transactions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Top Highest Transactions:</Text>
-          <TransactionTable />
+          <HighTransaction transactions={transactions} />
         </View>
       </ScrollView>
     </SafeAreaView>
