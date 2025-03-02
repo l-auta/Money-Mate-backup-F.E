@@ -1,12 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 
-const SpendingInsights = ({ transactions }) => {
+// SpendingInsights Component
+const SpendingInsights = () => {
+  const [transactions, setTransactions] = useState([]);
   const [insights, setInsights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Helper function to categorize transactions by type
-  const categorizeTransactions = () => {
+  // Fetch transactions from the backend
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('http://your-backend-url/api/transactions');
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+        const data = await response.json();
+        setTransactions(data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
+
+  // Categorize transactions by type and calculate total spending
+  const categorizeTransactions = useMemo(() => {
     const categories = {};
     let totalSpent = 0;
 
@@ -19,21 +40,23 @@ const SpendingInsights = ({ transactions }) => {
     });
 
     return { categories, totalSpent };
-  };
+  }, [transactions]);
 
-  // Generate spending insights based on transaction analysis
-  const generateInsights = () => {
-    const { categories, totalSpent } = categorizeTransactions();
+  // Generate spending insights based on the categorized data
+  useEffect(() => {
+    const { categories, totalSpent } = categorizeTransactions;
+    if (transactions.length === 0) return;
+
     const insightsList = [];
 
-    // High-spending category detection
+    // Detect High-Spending Categories (>30%)
     Object.entries(categories).forEach(([category, amount]) => {
       if (amount > totalSpent * 0.3) {
         insightsList.push(`You spent ${((amount / totalSpent) * 100).toFixed(1)}% on ${category}. Consider reducing this.`);
       }
     });
 
-    // Monthly spending trend analysis
+    // Monthly Spending Trend (Current vs. Last Month)
     const currentMonth = moment().format('YYYY-MM');
     const lastMonth = moment().subtract(1, 'month').format('YYYY-MM');
 
@@ -54,17 +77,31 @@ const SpendingInsights = ({ transactions }) => {
       );
     }
 
-    // Savings suggestion
+    // Suggest Savings if Spending > 5000
     if (totalSpent > 5000) {
       insightsList.push(`Consider saving 10% of your expenses (~Ksh ${Math.round(totalSpent * 0.1)}) for future use.`);
     }
 
     setInsights(insightsList);
-  };
+  }, [categorizeTransactions]);
 
-  useEffect(() => {
-    if (transactions.length > 0) generateInsights();
-  }, [transactions]);
+  // Render Component
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#6d2323" />
+        <Text>Loading insights...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -82,6 +119,7 @@ const SpendingInsights = ({ transactions }) => {
   );
 };
 
+// Component Styles
 const styles = StyleSheet.create({
   container: {
     marginVertical: 20,
@@ -92,7 +130,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3, // Android shadow
+    elevation: 3,
   },
   header: {
     fontSize: 22,
@@ -108,6 +146,19 @@ const styles = StyleSheet.create({
   noInsights: {
     fontSize: 16,
     color: '#888',
+  },
+  loaderContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
 });
 
