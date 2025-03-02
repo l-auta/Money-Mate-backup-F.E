@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Welcome from './screens/welcomePage';
 import SignUp from './screens/signUp';
+import LogIn from './screens/logIn';
+import MainPage from './screens/mainPage';
 
 // Create a stack navigator
 const Stack = createStackNavigator();
@@ -23,6 +25,16 @@ function App() {
           component={SignUp}
           options={{ title: 'Sign Up' }} // Customize the header title
         />
+        <Stack.Screen
+         name="LogIn"
+          component={LogIn}
+          options={{ title: 'Log In' }} // Customize the header title
+          />
+          <Stack.Screen
+          name="MainPage"
+          component={MainPage}
+          options={{ headerShown: false }} // Hide the header for the MainPage screen
+          />
       </Stack.Navigator>
     </NavigationContainer>
   );
