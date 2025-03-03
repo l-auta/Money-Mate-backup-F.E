@@ -1,4 +1,4 @@
-# Finance Regulator App
+# Money Mate
 
 A React Native application that helps users track their expenses by reading M-Pesa messages, extracting transaction details (amount, date, recipient, etc.), and displaying the data in a user-friendly interface. The app also sends the parsed data to a backend for processing and updates the UI with charts, tables, and summary cards.
 
