@@ -1,7 +1,6 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionCards from "../components/transactionCards";
-import TransactionTable from '../components/TransactionTable';
 import MoneyChart from "../components/MoneyChart";
 import HighTransaction from "../components/highTransactions"
 import React, { useState, useEffect } from "react";
@@ -36,11 +35,6 @@ function Dashboard() {
           <TransactionCards />
         </View>
 
-        {/* Transaction Table */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Transaction History:</Text>
-          <TransactionTable />
-        </View>
 
         {/* Money In/Out Chart */}
         <View style={styles.section}>

@@ -83,6 +83,7 @@ const MpesaReader = () => {
             .filter(Boolean); // Remove null values
 
           if (mpesaMessages.length > 0) {
+            console.log("Parsed M-Pesa messages:", mpesaMessages);
             sendTransactionsToBackend(mpesaMessages);
           }
         }
