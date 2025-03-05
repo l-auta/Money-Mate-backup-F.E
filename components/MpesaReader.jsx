@@ -46,7 +46,7 @@ const parseMpesaMessage = (sms) => {
 // Send parsed transactions to the backend
 const sendTransactionsToBackend = async (transactions) => {
   try {
-    const response = await fetch("http://your-backend-url/api/transactions", {
+    const response = await fetch("https://moneymatebackend.onrender.com/transactions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ transactions }),

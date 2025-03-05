@@ -15,7 +15,7 @@ const MoneyChart = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch('http://your-backend-url/api/transactions');
+        const response = await fetch('https://moneymatebackend.onrender.com/transactions');
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);

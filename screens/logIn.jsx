@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,17 +7,48 @@ const LogIn = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = () => {
+  const sendLoginData = async (username, password) => {
+    try {
+      const response = await fetch('https://moneymatebackend.onrender.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }), // Send username and password as JSON
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const result = await response.json();
+      return result; // Return the response from the backend
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async () => {
     // Basic validation for empty fields
     if (!username || !password) {
-      alert('Please fill in both fields');
+      Alert.alert('Error', 'Please fill in both fields');
       return;
     }
 
-    navigation.replace('MainPage'); // Navigate to the main screen after login
+    try {
+      // Send login data to the backend
+      const result = await sendLoginData(username, password);
 
-    console.log('Form Submitted with Username: ', username);
-    console.log('Form Submitted with Password: ', password);
+      // Handle the backend response
+      if (result.success) {
+        navigation.replace('MainPage'); // Navigate to the main screen after successful login
+      } else {
+        Alert.alert('Error', result.message || 'Invalid username or password');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Login failed. Please try again.');
+    }
 
     // Clear inputs after submission
     setUsername('');
