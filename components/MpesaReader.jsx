@@ -1,6 +1,6 @@
 // MpesaReader.js
 import React, { useEffect } from "react";
-import { PermissionsAndroid, Platform } from "react-native";
+import { PermissionsAndroid, Platform, BackHandler } from "react-native";
 import SmsAndroid from "react-native-get-sms-android";
 
 // Request SMS permissions on Android
@@ -17,6 +17,14 @@ const requestSmsPermission = async () => {
           buttonPositive: "Allow",
         }
       );
+
+      // If the user denies permission, exit the app
+      if (granted === PermissionsAndroid.RESULTS.DENIED) {
+        console.log("SMS permission denied. Exiting app...");
+        BackHandler.exitApp(); // Exit the app
+        return false;
+      }
+
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
       console.error("Error requesting SMS permission", err);
@@ -76,9 +84,16 @@ const MpesaReader = () => {
         }),
         (fail) => console.error("Failed to fetch SMS:", fail),
         (success) => {
+          console.log("Raw SMS response:", success); // Debugging
+
           const messages = JSON.parse(success);
-          const mpesaMessages = messages
-            .filter((msg) => msg.body.includes("M-PESA"))
+          console.log("Parsed SMS messages:", messages); // Debugging
+
+          // Ensure messages is an array
+          const messageList = Array.isArray(messages) ? messages : [];
+
+          const mpesaMessages = messageList
+            .filter((msg) => msg.body && msg.body.includes("M-PESA")) // Ensure msg.body exists
             .map((msg) => parseMpesaMessage(msg.body))
             .filter(Boolean); // Remove null values
 
