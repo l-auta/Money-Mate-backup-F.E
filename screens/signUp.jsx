@@ -3,13 +3,13 @@ import React, { useState } from "react";
 
 function SignUp({ navigation }) {
   // State for input fields
-  const [fullName, setFullName] = useState("");
+  const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   // State for error messages
   const [errors, setErrors] = useState({
-    fullName: "",
+    username: "",
     email: "",
     password: "",
   });
@@ -20,11 +20,11 @@ function SignUp({ navigation }) {
   // Validation function
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { fullName: "", email: "", password: "" };
+    const newErrors = { username: "", email: "", password: "" };
 
     // Validate Full Name
-    if (!fullName.trim()) {
-      newErrors.fullName = "Full Name is required";
+    if (!username.trim()) {
+      newErrors.username = "Full Name is required";
       isValid = false;
     }
 
@@ -66,13 +66,13 @@ function SignUp({ navigation }) {
     try {
       // Prepare the data to send to the backend
       const userData = {
-        fullName,
+        username,
         email,
         password,
       };
 
       // Send a POST request to your backend
-      const response = await fetch("http://your-backend-url/api/signup", {
+      const response = await fetch("https://moneymatebackend.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,12 +105,12 @@ function SignUp({ navigation }) {
 
         {/* Full Name Input */}
         <TextInput
-          style={[styles.input, errors.fullName && styles.inputError]}
+          style={[styles.input, errors.username && styles.inputError]}
           placeholder="Full Name"
           placeholderTextColor="#999"
           color="#333"
-          value={fullName}
-          onChangeText={(text) => setFullName(text)}
+          value={username}
+          onChangeText={(text) => setUserName(text)}
         />
         {errors.fullName ? <Text style={styles.errorText}>{errors.fullName}</Text> : null}
 
