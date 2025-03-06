@@ -10,7 +10,7 @@ const LogIn = ({ navigation }) => {
 
   
   const sendLoginData = async (username, password) => {
-    console.log(username, password);
+    console.log("Data being sent to backend:", { username, password }); // Log the data
    
     // Clear any existing cookies
     await CookieManager.clearAll();
