@@ -66,11 +66,22 @@ function SignUp({ navigation }) {
     try {
       // Prepare the data to send to the backend
       const userData = {
-        username,
-        email,
-        password,
+        username: username.trim(),
+        email: email.trim(),
+        password: password.trim()
       };
       console.log("Data being sent to backend:", userData);
+
+      // Validate the JSON to ensure it's valid
+      const requestBody = JSON.stringify(userData);
+      console.log("JSON sent to backend:", JSON);
+      try {
+        JSON.parse(requestBody); // This will throw an error if the JSON is invalid
+        console.log("JSON is valid");
+      } catch (error) {
+        console.error("Invalid JSON:", error);
+        return;
+      }
 
       // Send a POST request to your backend
       const response = await fetch("https://moneymatebackend.onrender.com/signup", {
@@ -78,7 +89,7 @@ function SignUp({ navigation }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(userData),
+        body: requestBody,
       });
 
       console.log("Response status:", response.status);
