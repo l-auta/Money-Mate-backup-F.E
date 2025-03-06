@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
+import CookieManager from '@react-native-cookies/cookies';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LogIn = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
+  
   const sendLoginData = async (username, password) => {
+    console.log(username, password);
+   
+    // Clear any existing cookies
+    await CookieManager.clearAll();
+
     try {
       const response = await fetch('https://moneymatebackend.onrender.com/login', {
         method: 'POST',
@@ -15,6 +22,7 @@ const LogIn = ({ navigation }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username, password }), // Send username and password as JSON
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -42,6 +50,9 @@ const LogIn = ({ navigation }) => {
 
       // Handle the backend response
       if (result.success) {
+        const cookies = await CookieManager.get('https://moneymatebackend.onrender.com');
+        console.log('Cookies:', cookies);
+        Alert.alert('Success', 'Logged in successfully'); // Show success message and navigate to the main screen
         navigation.replace('MainPage'); // Navigate to the main screen after successful login
       } else {
         Alert.alert('Error', result.message || 'Invalid username or password');

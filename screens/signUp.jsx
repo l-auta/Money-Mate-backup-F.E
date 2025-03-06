@@ -70,6 +70,7 @@ function SignUp({ navigation }) {
         email,
         password,
       };
+      console.log("Data being sent to backend:", userData);
 
       // Send a POST request to your backend
       const response = await fetch("https://moneymatebackend.onrender.com/signup", {
@@ -80,13 +81,17 @@ function SignUp({ navigation }) {
         body: JSON.stringify(userData),
       });
 
+      console.log("Response status:", response.status);
+
       // Check if the request was successful
       if (response.ok) {
         const data = await response.json();
+        console.log("Backend response:", data);
         Alert.alert("Success", "Account created successfully!");
         navigation.navigate("LogIn"); // Navigate to Login screen
       } else {
         const errorData = await response.json();
+        console.log("Backend error response:", errorData);
         Alert.alert("Error", errorData.message || "Failed to create account.");
       }
     } catch (error) {
@@ -112,7 +117,7 @@ function SignUp({ navigation }) {
           value={username}
           onChangeText={(text) => setUserName(text)}
         />
-        {errors.fullName ? <Text style={styles.errorText}>{errors.fullName}</Text> : null}
+        {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
 
         {/* Email Input */}
         <TextInput
