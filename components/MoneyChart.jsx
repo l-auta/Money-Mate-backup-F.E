@@ -1,28 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import moment from 'moment';
 
 const screenWidth = Dimensions.get('window').width;
 
-const MoneyChart = () => {
+const MoneyChart = ({ navigation }) => {
   const [transactions, setTransactions] = useState([]);
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch transactions from backend
+  // Fetch transactions from backend with session
   useEffect(() => {
     const fetchTransactions = async () => {
+      setLoading(true);
+
       try {
-        const response = await fetch('https://moneymatebackend.onrender.com/transactions');
+        // Fetch transactions - including credentials (cookies)
+        const response = await fetch('https://moneymatebackend.onrender.com/transactions', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Ensures cookies are sent with the request
+        });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            Alert.alert('Session Expired', 'Please log in again.');
+            navigation.navigate('Login'); // Redirect to login if session expired
+          }
           throw new Error(`Error: ${response.status}`);
         }
 
         const data = await response.json();
-        setTransactions(data);
+        setTransactions(data); // Set transactions from backend
       } catch (error) {
         console.error('Error fetching transactions:', error);
         setError('Failed to load transactions.');
@@ -32,7 +45,7 @@ const MoneyChart = () => {
     };
 
     fetchTransactions();
-  }, []);
+  }, [navigation]);
 
   // Helper function to categorize transactions
   const categorizeTransactions = (transactions) => {
@@ -57,7 +70,7 @@ const MoneyChart = () => {
     if (transactions.length === 0) return;
 
     const monthlyData = categorizeTransactions(transactions);
-    const labels = Object.keys(monthlyData).sort(); // Month labels
+    const labels = Object.keys(monthlyData).sort();
     const incomeData = labels.map((month) => monthlyData[month].income);
     const expenseData = labels.map((month) => monthlyData[month].expense);
 

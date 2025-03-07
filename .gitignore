@@ -73,3 +73,20 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Node dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# IDE files
+.vscode/
+.idea/
+android/
+ios/
+.DS_Store
+
+
+# Build outputs
+android/app/build/
+ios/Pods/

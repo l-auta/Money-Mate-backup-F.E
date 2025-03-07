@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from "react-native";
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// SignUp Component
 function SignUp({ navigation }) {
   // State for input fields
   const [username, setUserName] = useState("");
@@ -47,7 +49,6 @@ function SignUp({ navigation }) {
       isValid = false;
     }
 
-    // Update errors state
     setErrors(newErrors);
     return isValid;
   };
@@ -55,68 +56,69 @@ function SignUp({ navigation }) {
   // Handle form submission
   const handleSignUp = async () => {
     if (!validateForm()) {
-      // If form is invalid, show error messages
       Alert.alert("Error", "Please fix the errors in the form.");
       return;
     }
 
-    // If form is valid, proceed with sign-up logic
-    setIsLoading(true); // Show loading indicator
+    setIsLoading(true);
 
     try {
       // Prepare the data to send to the backend
       const userData = {
         username: username.trim(),
         email: email.trim(),
-        password: password.trim()
+        password: password.trim(),
       };
-      console.log("Data being sent to backend:", userData);
 
-      // Validate the JSON to ensure it's valid
+      // Validate the JSON format
       const requestBody = JSON.stringify(userData);
-      console.log("JSON sent to backend:", JSON);
       try {
-        JSON.parse(requestBody); // This will throw an error if the JSON is invalid
-        console.log("JSON is valid");
+        JSON.parse(requestBody); // Ensure the JSON is valid
       } catch (error) {
-        console.error("Invalid JSON:", error);
+        console.error("Invalid JSON format:", error);
+        Alert.alert("Error", "Invalid data format. Please try again.");
         return;
       }
 
-      // Send a POST request to your backend
+      console.log("Data being sent to backend:", userData);
+
+      // Send a POST request to the backend
       const response = await fetch("https://moneymatebackend.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: requestBody,
+        credentials: "include", // Include cookies for session management
       });
 
       console.log("Response status:", response.status);
 
-      // Check if the request was successful
       if (response.ok) {
         const data = await response.json();
         console.log("Backend response:", data);
+
+        // Store the session information if needed (optional)
+        await AsyncStorage.setItem("session", JSON.stringify(data));
+
         Alert.alert("Success", "Account created successfully!");
-        navigation.navigate("LogIn"); // Navigate to Login screen
+        navigation.navigate("MainPage"); // Navigate to the main page
       } else {
         const errorData = await response.json();
-        console.log("Backend error response:", errorData);
-        Alert.alert("Error", errorData.message || "Failed to create account.");
+        console.error("Backend error response:", errorData);
+        Alert.alert("Error", errorData.error || "Failed to create account.");
       }
     } catch (error) {
       console.error("Error sending data to backend:", error);
-      Alert.alert("Error", "An error occurred. Please try again.");
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
     } finally {
-      setIsLoading(false); // Hide loading indicator
+      setIsLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Header */}
         <Text style={styles.header}>Create Account</Text>
 
         {/* Full Name Input */}
@@ -124,9 +126,8 @@ function SignUp({ navigation }) {
           style={[styles.input, errors.username && styles.inputError]}
           placeholder="Full Name"
           placeholderTextColor="#999"
-          color="#333"
           value={username}
-          onChangeText={(text) => setUserName(text)}
+          onChangeText={setUserName}
         />
         {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
 
@@ -136,9 +137,8 @@ function SignUp({ navigation }) {
           placeholder="Email"
           placeholderTextColor="#999"
           keyboardType="email-address"
-          color="#333"
           value={email}
-          onChangeText={(text) => setEmail(text)}
+          onChangeText={setEmail}
         />
         {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
@@ -148,22 +148,21 @@ function SignUp({ navigation }) {
           placeholder="Password"
           placeholderTextColor="#999"
           secureTextEntry
-          color="#333"
           value={password}
-          onChangeText={(text) => setPassword(text)}
+          onChangeText={setPassword}
         />
         {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
         {/* Sign Up Button */}
         <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={isLoading}>
           {isLoading ? (
-            <ActivityIndicator color="#fff" /> // Show loading indicator
+            <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.buttonText}>Sign Up</Text>
           )}
         </TouchableOpacity>
 
-        {/* Login Link */}
+        {/* Navigate to Login */}
         <TouchableOpacity onPress={() => navigation.navigate("LogIn")}>
           <Text style={styles.loginText}>
             Already have an account? <Text style={styles.loginLink}>Log In</Text>
@@ -199,7 +198,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 16,
     backgroundColor: "#fff",
-    color: "#333",
   },
   inputError: {
     borderColor: "red",
