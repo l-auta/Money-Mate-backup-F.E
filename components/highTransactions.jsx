@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
-import { Card } from "react-native-paper";
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { Card } from 'react-native-paper';
 
 // Helper function to get the highest transaction
 const getHighestTransaction = (transactions) => {
   if (!transactions || transactions.length === 0) return null;
 
   const validTransactions = transactions.filter(
-    (transaction) =>
-      typeof transaction.amount === "number" && transaction.amount > 0
+    (transaction) => typeof transaction.amount === 'number' && transaction.amount > 0
   );
 
   if (validTransactions.length === 0) return null;
@@ -21,13 +20,11 @@ const getHighestTransaction = (transactions) => {
 // Helper function to categorize transactions (day, month, year)
 const categorizeTransactions = (transactions) => {
   const today = new Date();
-  const isSameDay = (date) =>
-    new Date(date).toDateString() === today.toDateString();
+  const isSameDay = (date) => new Date(date).toDateString() === today.toDateString();
   const isSameMonth = (date) =>
     new Date(date).getMonth() === today.getMonth() &&
     new Date(date).getFullYear() === today.getFullYear();
-  const isSameYear = (date) =>
-    new Date(date).getFullYear() === today.getFullYear();
+  const isSameYear = (date) => new Date(date).getFullYear() === today.getFullYear();
 
   return {
     dayTransactions: transactions.filter((t) => isSameDay(t.date)),
@@ -36,68 +33,43 @@ const categorizeTransactions = (transactions) => {
   };
 };
 
-const TransactionList = ({ navigation }) => {
+const TransactionList = () => {
   const [dayTransactions, setDayTransactions] = useState([]);
   const [monthTransactions, setMonthTransactions] = useState([]);
   const [yearTransactions, setYearTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch transaction data from backend using session cookies
-  const fetchData = async () => {
-    try {
-      const response = await fetch(
-        "https://moneymatebackend.onrender.com/transactions",
-        {
-          method: "GET",
-          credentials: "include", // Ensure session cookie is sent
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.status === 401) {
-        Alert.alert("Session Expired", "Please log in again.");
-        navigation.navigate("LogIn");
-        return;
-      }
-
-      if (!response.ok) throw new Error("Failed to fetch transactions");
-
-      const data = await response.json();
-
-      // Categorize transactions into day, month, year
-      const { dayTransactions, monthTransactions, yearTransactions } =
-        categorizeTransactions(data);
-
-      setDayTransactions(dayTransactions);
-      setMonthTransactions(monthTransactions);
-      setYearTransactions(yearTransactions);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch transaction data from backend
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://moneymatebackend.onrender.com/transactions');
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+
+        const data = await response.json();
+
+        // Categorize transactions into day, month, year
+        const { dayTransactions, monthTransactions, yearTransactions } = categorizeTransactions(data);
+
+        setDayTransactions(dayTransactions);
+        setMonthTransactions(monthTransactions);
+        setYearTransactions(yearTransactions);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
   // Optimize with useMemo
-  const dayHighest = useMemo(() => getHighestTransaction(dayTransactions), [
-    dayTransactions,
-  ]);
-  const monthHighest = useMemo(
-    () => getHighestTransaction(monthTransactions),
-    [monthTransactions]
-  );
-  const yearHighest = useMemo(
-    () => getHighestTransaction(yearTransactions),
-    [yearTransactions]
-  );
+  const dayHighest = useMemo(() => getHighestTransaction(dayTransactions), [dayTransactions]);
+  const monthHighest = useMemo(() => getHighestTransaction(monthTransactions), [monthTransactions]);
+  const yearHighest = useMemo(() => getHighestTransaction(yearTransactions), [yearTransactions]);
 
   if (loading) return <ActivityIndicator size="large" color="#6d2323" />;
   if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
@@ -115,9 +87,7 @@ const TransactionList = ({ navigation }) => {
           <View key={index} style={styles.transactionSection}>
             <Text style={styles.sectionHeader}>{item.label}</Text>
             {item.data ? (
-              <Text style={styles.transactionText}>
-                Amount: {item.data.amount} KSh
-              </Text>
+              <Text style={styles.transactionText}>Amount: {item.data.amount} KSh</Text>
             ) : (
               <Text style={styles.noTransactionText}>
                 No transactions for {item.label.toLowerCase()}
@@ -133,12 +103,12 @@ const TransactionList = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { padding: 16 },
   card: { padding: 20, elevation: 3 },
-  header: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
   transactionSection: { marginBottom: 20 },
-  sectionHeader: { fontSize: 18, fontWeight: "600" },
-  transactionText: { fontSize: 16, color: "#333" },
-  noTransactionText: { fontSize: 16, color: "#aaa" },
-  errorText: { color: "red", textAlign: "center", marginTop: 20 },
+  sectionHeader: { fontSize: 18, fontWeight: '600' },
+  transactionText: { fontSize: 16, color: '#333' },
+  noTransactionText: { fontSize: 16, color: '#aaa' },
+  errorText: { color: 'red', textAlign: 'center', marginTop: 20 },
 });
 
 export default TransactionList;

@@ -1,38 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, FlatList, ActivityIndicator } from 'react-native';
 import { DataTable } from 'react-native-paper';
 
 // TransactionTable Component
-const TransactionTable = ({ navigation }) => {
-  const [transactions, setTransactions] = useState([]);
-  const [filteredTransactions, setFilteredTransactions] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchDate, setSearchDate] = useState('');
-  const [transactionType, setTransactionType] = useState('all');
+const TransactionTable = () => {
+  const [transactions, setTransactions] = useState([]); 
+  const [filteredTransactions, setFilteredTransactions] = useState([]); 
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const [searchDate, setSearchDate] = useState(''); 
+  const [transactionType, setTransactionType] = useState('all'); 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); 
 
-  // Fetch Transactions from Backend (With Session Cookies)
+  // Fetch Transactions from Backend
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch('https://moneymatebackend.onrender.com/transactions', {
-          method: 'GET',
-          credentials: 'include', // Automatically sends cookies
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.status === 401) {
-          Alert.alert('Session Expired', 'Please log in again.');
-          navigation.navigate('LogIn'); // Redirect to login on 401
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch transactions');
-        }
+        const response = await fetch('https://moneymatebackend.onrender.com/transactions'); 
+        if (!response.ok) throw new Error('Failed to fetch transactions');
 
         const data = await response.json();
         setTransactions(data);
@@ -52,16 +37,19 @@ const TransactionTable = ({ navigation }) => {
   useEffect(() => {
     let filtered = [...transactions];
 
+    // Filter by amount
     if (searchQuery) {
       filtered = filtered.filter((transaction) =>
         transaction.amount.toString().includes(searchQuery)
       );
     }
 
+    // Filter by date (YYYY-MM-DD)
     if (searchDate) {
       filtered = filtered.filter((transaction) => transaction.date === searchDate);
     }
 
+    // Filter by transaction type ('sent', 'received')
     if (transactionType !== 'all') {
       filtered = filtered.filter((transaction) => transaction.type === transactionType);
     }
@@ -78,8 +66,10 @@ const TransactionTable = ({ navigation }) => {
     </DataTable.Row>
   );
 
+  // Show loading spinner while fetching
   if (loading) return <ActivityIndicator size="large" color="#6d2323" />;
 
+  //  Show error message if fetch fails
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (

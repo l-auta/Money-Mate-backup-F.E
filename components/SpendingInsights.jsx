@@ -1,61 +1,30 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import moment from 'moment';
 
 // SpendingInsights Component
-const SpendingInsights = ({ navigation }) => {
+const SpendingInsights = () => {
   const [transactions, setTransactions] = useState([]);
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch transactions using session (with credentials)
+  // Fetch transactions from the backend
   useEffect(() => {
     const fetchTransactions = async () => {
-      setLoading(true);
-
       try {
-        // Ensure session exists or redirect to login
-        const userSession = await AsyncStorage.getItem('userSession');
-        if (!userSession) {
-          Alert.alert('Error', 'You must be logged in to view this data.');
-          navigation.replace('LogIn'); // Redirect to login page
-          return;
-        }
-
-        // Fetch transactions (session handled via credentials)
-        const response = await fetch('https://moneymatebackend.onrender.com/transactions', {
-          method: 'GET',
-          credentials: 'include', // Important: Send cookies for session
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        // Handle session expiry
-        if (response.status === 401) {
-          Alert.alert('Session Expired', 'Please log in again.');
-          await AsyncStorage.removeItem('userSession'); // Clear expired session
-          navigation.replace('LogIn');
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch transactions');
-        }
-
+        const response = await fetch('https://moneymatebackend.onrender.com/transactions');
+        if (!response.ok) throw new Error('Failed to fetch transactions');
         const data = await response.json();
-        setTransactions(data); // Store transactions
+        setTransactions(data);
       } catch (error) {
         setError(error.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchTransactions();
-  }, [navigation]);
+  }, []);
 
   // Categorize transactions by type and calculate total spending
   const categorizeTransactions = useMemo(() => {
@@ -73,21 +42,21 @@ const SpendingInsights = ({ navigation }) => {
     return { categories, totalSpent };
   }, [transactions]);
 
-  // Generate spending insights
+  // Generate spending insights based on the categorized data
   useEffect(() => {
     const { categories, totalSpent } = categorizeTransactions;
     if (transactions.length === 0) return;
 
     const insightsList = [];
 
-    // Detect High-Spending Categories (>30% of total)
+    // Detect High-Spending Categories (>30%)
     Object.entries(categories).forEach(([category, amount]) => {
       if (amount > totalSpent * 0.3) {
         insightsList.push(`You spent ${((amount / totalSpent) * 100).toFixed(1)}% on ${category}. Consider reducing this.`);
       }
     });
 
-    // Monthly Spending Trend (Compare current month vs last month)
+    // Monthly Spending Trend (Current vs. Last Month)
     const currentMonth = moment().format('YYYY-MM');
     const lastMonth = moment().subtract(1, 'month').format('YYYY-MM');
 

@@ -3,35 +3,23 @@ import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native'
 import { Card } from 'react-native-paper';
 
 // TransactionCards Component
-const TransactionCards = ({ navigation }) => {
+const TransactionCards = () => {
   const [depositTotal, setDepositTotal] = useState(0);
   const [transferTotal, setTransferTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch transactions with session-based authentication
+  // Fetch transactions from the backend
   const fetchTransactions = async () => {
-    setLoading(true);
     try {
-      const response = await fetch('https://moneymatebackend.onrender.com/transactions', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Send session cookies with the request
-      });
-
+      const response = await fetch('https://moneymatebackend.onrender.com/transactions');
       if (!response.ok) {
-        if (response.status === 401) {
-          console.error('Unauthorized. Redirecting to login.');
-          navigation.navigate('Login'); // Redirect to Login if not authenticated
-          return;
-        }
         throw new Error('Failed to fetch transactions');
       }
-
       const data = await response.json();
-      calculateTotals(data); // Update totals
+
+      // Process and update totals
+      calculateTotals(data);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       setError('Failed to load transactions.');
@@ -57,7 +45,7 @@ const TransactionCards = ({ navigation }) => {
     setTransferTotal(transferSum);
   };
 
-  // Fetch transactions on component mount
+  // Fetch data on component mount
   useEffect(() => {
     fetchTransactions();
   }, []);
@@ -127,10 +115,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f5f5f5', // Light background for contrast
   },
   cardsContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row', // Align cards side by side
     justifyContent: 'space-between',
     marginBottom: 20,
   },
@@ -144,7 +132,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 3, // For Android shadow
   },
   cardTitle: {
     fontSize: 18,
