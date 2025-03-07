@@ -1,6 +1,6 @@
-// MpesaReader.js
 import React, { useEffect } from "react";
 import { PermissionsAndroid, Platform, BackHandler } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import SmsAndroid from "react-native-get-sms-android";
 
 // Request SMS permissions on Android
@@ -18,10 +18,10 @@ const requestSmsPermission = async () => {
         }
       );
 
-      // If the user denies permission, exit the app
+      // Exit the app if permission is denied
       if (granted === PermissionsAndroid.RESULTS.DENIED) {
         console.log("SMS permission denied. Exiting app...");
-        BackHandler.exitApp(); // Exit the app
+        BackHandler.exitApp();
         return false;
       }
 
@@ -51,19 +51,42 @@ const parseMpesaMessage = (sms) => {
   return { amount, date, recipient, type };
 };
 
-// Send parsed transactions to the backend
+// Send parsed transactions to the backend with session management
 const sendTransactionsToBackend = async (transactions) => {
   try {
-    const response = await fetch("https://moneymatebackend.onrender.com/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactions }),
-    });
+    // Check if user is logged in (based on session flag in AsyncStorage)
+    const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
+
+    if (!isLoggedIn) {
+      console.error("User not logged in. Exiting...");
+      BackHandler.exitApp(); // Exit app if no session is found
+      return;
+    }
+
+    const response = await fetch(
+      "https://moneymatebackend.onrender.com/transactions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ transactions }),
+        credentials: "include", // Ensure cookies (session) are sent with the request
+      }
+    );
 
     if (response.ok) {
       console.log("Transactions sent successfully");
     } else {
-      console.error("Failed to send transactions");
+      const errorData = await response.json();
+      console.error("Failed to send transactions:", errorData);
+
+      // If the session is invalid, clear and exit
+      if (response.status === 401) {
+        console.warn("Session expired or invalid. Logging out...");
+        await AsyncStorage.removeItem("isLoggedIn"); // Clear session flag
+        BackHandler.exitApp(); // Exit the app or navigate to login
+      }
     }
   } catch (error) {
     console.error("Error sending data to backend:", error);
@@ -84,26 +107,32 @@ const MpesaReader = () => {
         }),
         (fail) => console.error("Failed to fetch SMS:", fail),
         (success) => {
-          console.log("Raw SMS response:", success); // Debugging
+          console.log("Raw SMS response:", success);
 
-          const messages = JSON.parse(success);
-          console.log("Parsed SMS messages:", messages); // Debugging
+          try {
+            const messages = JSON.parse(success);
+            console.log("Parsed SMS messages:", messages);
 
-          // Ensure messages is an array
-          const messageList = Array.isArray(messages) ? messages : [];
+            const messageList = Array.isArray(messages) ? messages : [];
 
-          const mpesaMessages = messageList
-            .filter((msg) => msg.body && msg.body.includes("M-PESA")) // Ensure msg.body exists
-            .map((msg) => parseMpesaMessage(msg.body))
-            .filter(Boolean); // Remove null values
+            const mpesaMessages = messageList
+              .filter((msg) => msg.body && msg.body.includes("M-PESA"))
+              .map((msg) => parseMpesaMessage(msg.body))
+              .filter(Boolean);
 
-          if (mpesaMessages.length > 0) {
-            console.log("Parsed M-Pesa messages:", mpesaMessages);
-            sendTransactionsToBackend(mpesaMessages);
+            if (mpesaMessages.length > 0) {
+              console.log("Parsed M-Pesa messages:", mpesaMessages);
+              sendTransactionsToBackend(mpesaMessages);
+            } else {
+              console.log("No M-Pesa messages found.");
+            }
+          } catch (error) {
+            console.error("Error parsing SMS JSON:", error);
           }
         }
       );
     };
+
     init();
   }, []);
 
