@@ -1,7 +1,7 @@
-// MpesaReader.js
 import React, { useEffect } from "react";
 import { PermissionsAndroid, Platform, BackHandler } from "react-native";
 import SmsAndroid from "react-native-get-sms-android";
+import Transactions from "../screens/transaction";
 
 // Request SMS permissions on Android
 const requestSmsPermission = async () => {
@@ -36,24 +36,30 @@ const requestSmsPermission = async () => {
 
 // Parse M-Pesa messages
 const parseMpesaMessage = (sms) => {
-  const amountMatch = sms.match(/Ksh (\d+(?:,\d{3})*(?:\.\d{2})?)/i);
-  const dateMatch = sms.match(/on (\d{1,2}(st|nd|rd|th) \w+ \d{4})/i);
-  const recipientMatch = sms.match(/sent to (.*?) on/i);
+  console.log("Parsing SMS:", sms); // Debugging
 
-  if (!amountMatch || !dateMatch) return null;
+  // Updated regex to match the new SMS format
+  const amountMatch = sms.match(/Ksh\. (\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh. 50"
+  const transactionIdMatch = sms.match(/(\d+):R\d+\.\d+\.\d+ confirmed/i); // Match transaction ID
+  const type = sms.includes("received") ? "received" : "sent"; // Determine transaction type
+
+  if (!amountMatch || !transactionIdMatch) {
+    console.log("SMS does not match M-Pesa format:", sms); // Debugging
+    return null;
+  }
 
   const amount = parseFloat(amountMatch[1].replace(/,/g, ""));
-  const date = dateMatch[1];
-  const recipient = recipientMatch ? recipientMatch[1] : "Unknown";
+  const transactionId = transactionIdMatch[1]; // Extract transaction ID
 
-  const type = sms.includes("sent to") ? "sent" : "received";
-
-  return { amount, date, recipient, type };
+  console.log("Parsed M-Pesa message:", { amount, transactionId, type }); // Debugging
+  return { amount, transactionId, type };
 };
 
 // Send parsed transactions to the backend
 const sendTransactionsToBackend = async (transactions) => {
   try {
+    console.log("Sending transactions to backend:", transactions); // Debugging
+
     const response = await fetch("https://moneymatebackend.onrender.com/transactions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,31 +81,40 @@ const MpesaReader = () => {
   useEffect(() => {
     const init = async () => {
       const hasPermission = await requestSmsPermission();
+      console.log("SMS permission granted:", hasPermission); // Debugging
       if (!hasPermission) return;
 
+      const filter = {
+        box: "inbox", // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
+        address: "ETOPUP", // Filter by sender's phone number or shortcode
+      };
+
       SmsAndroid.list(
-        JSON.stringify({
-          box: "inbox", // Read messages from the inbox
-          maxCount: 50, // Number of messages to read
-        }),
-        (fail) => console.error("Failed to fetch SMS:", fail),
-        (success) => {
-          console.log("Raw SMS response:", success); // Debugging
+        JSON.stringify(filter),
+        (fail) => {
+          console.error("Failed to fetch SMS:", fail);
+        },
+        (count, smsList) => {
+          console.log("Count: ", count); // Total number of SMS messages matching the filter
+          // console.log("List: ", smsList); // Raw JSON string of SMS messages
 
-          const messages = JSON.parse(success);
-          console.log("Parsed SMS messages:", messages); // Debugging
+          try {
+            const messages = JSON.parse(smsList); // Parse the JSON string into an array of objects
+            console.log("Parsed SMS messages:", messages); // Debugging
 
-          // Ensure messages is an array
-          const messageList = Array.isArray(messages) ? messages : [];
+            // Parse and filter M-Pesa messages
+            const mpesaMessages = messages
+              .map((msg) => parseMpesaMessage(msg.body)) // Parse each SMS body
+              .filter(Boolean); // Remove null values (invalid M-Pesa messages)
 
-          const mpesaMessages = messageList
-            .filter((msg) => msg.body && msg.body.includes("M-PESA")) // Ensure msg.body exists
-            .map((msg) => parseMpesaMessage(msg.body))
-            .filter(Boolean); // Remove null values
-
-          if (mpesaMessages.length > 0) {
-            console.log("Parsed M-Pesa messages:", mpesaMessages);
-            sendTransactionsToBackend(mpesaMessages);
+            if (mpesaMessages.length > 0) {
+              console.log("Parsed M-Pesa messages:", mpesaMessages);
+              sendTransactionsToBackend(mpesaMessages); // Send parsed messages to the backend
+            } else {
+              console.log("No M-Pesa messages found.");
+            }
+          } catch (error) {
+            console.error("Error parsing SMS response:", error);
           }
         }
       );
