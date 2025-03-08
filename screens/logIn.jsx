@@ -12,9 +12,6 @@ const LogIn = ({ navigation }) => {
   const sendLoginData = async (username, password) => {
     console.log("Data being sent to backend:", { username, password }); // Log the data
    
-    // Clear any existing cookies
-    await CookieManager.clearAll();
-
     try {
       const response = await fetch('https://moneymatebackend.onrender.com/login', {
         method: 'POST',

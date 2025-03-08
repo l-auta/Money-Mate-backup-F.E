@@ -38,21 +38,26 @@ const requestSmsPermission = async () => {
 const parseMpesaMessage = (sms) => {
   console.log("Parsing SMS:", sms); // Debugging
 
-  // Updated regex to match the new SMS format
-  const amountMatch = sms.match(/Ksh\. (\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh. 50"
-  const transactionIdMatch = sms.match(/(\d+):R\d+\.\d+\.\d+ confirmed/i); // Match transaction ID
-  const type = sms.includes("received") ? "received" : "sent"; // Determine transaction type
+  // Regex to match the amount
+  const amountMatch = sms.match(/Ksh\. (\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh. 60"
 
-  if (!amountMatch || !transactionIdMatch) {
+  // Determine transaction type
+  const type = sms.includes("received") ? "received" : "sent";
+
+  // If amount is not found, the SMS does not match the expected format
+  if (!amountMatch) {
     console.log("SMS does not match M-Pesa format:", sms); // Debugging
     return null;
   }
 
+  // Extract amount
   const amount = parseFloat(amountMatch[1].replace(/,/g, ""));
-  const transactionId = transactionIdMatch[1]; // Extract transaction ID
 
-  console.log("Parsed M-Pesa message:", { amount, transactionId, type }); // Debugging
-  return { amount, transactionId, type };
+  // If the date is not in the SMS body, use the timestamp from the metadata
+  const date = new Date().toLocaleString(); // Use current date as a placeholder
+
+  console.log("Parsed M-Pesa message:", { amount, date, type }); // Debugging
+  return { amount, date, type };
 };
 
 // Send parsed transactions to the backend
@@ -66,8 +71,11 @@ const sendTransactionsToBackend = async (transactions) => {
       body: JSON.stringify({ transactions }),
     });
 
+    console.log("Response status:", response.status);
+    // console.log("Response URL:", response.url); 
+
     if (response.ok) {
-      console.log("Transactions sent successfully");
+      console.log("Transactions sent successfully", response);
     } else {
       console.error("Failed to send transactions");
     }
