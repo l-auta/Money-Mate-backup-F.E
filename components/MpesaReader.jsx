@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { PermissionsAndroid, Platform, BackHandler } from "react-native";
 import SmsAndroid from "react-native-get-sms-android";
-import Transactions from "../screens/transaction";
 
 // Request SMS permissions on Android
 const requestSmsPermission = async () => {
@@ -35,26 +34,46 @@ const requestSmsPermission = async () => {
 };
 
 // Parse M-Pesa messages
+const parseMpesaDate = (timestamp) => {
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date format');
+  }
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+};
+
+const formatAmount = (amount) => {
+  return parseFloat(amount).toFixed(1); // Ensure the amount has one decimal place
+};
+
 const parseMpesaMessage = (sms) => {
   console.log("Parsing SMS:", sms); // Debugging
 
   // Regex to match the amount
-  const amountMatch = sms.match(/Ksh\. (\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh. 60"
+  const amountMatch = sms.body.match(/Ksh\. (\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh. 60"
 
   // Determine transaction type
-  const type = sms.includes("received") ? "received" : "sent";
+  const type = sms.body.includes("received") ? "received" : "sent";
 
   // If amount is not found, the SMS does not match the expected format
   if (!amountMatch) {
-    console.log("SMS does not match M-Pesa format:", sms); // Debugging
+    console.log("SMS does not match M-Pesa format:", sms.body); // Debugging
     return null;
   }
 
   // Extract amount
-  const amount = parseFloat(amountMatch[1].replace(/,/g, ""));
+  const amount = formatAmount(amountMatch[1].replace(/,/g, ""));
 
-  // If the date is not in the SMS body, use the timestamp from the metadata
-  const date = new Date().toLocaleString(); // Use current date as a placeholder
+  // Use the SMS metadata date (timestamp in milliseconds)
+  const date = parseMpesaDate(sms.date);
 
   console.log("Parsed M-Pesa message:", { amount, date, type }); // Debugging
   return { amount, date, type };
@@ -65,19 +84,25 @@ const sendTransactionsToBackend = async (transactions) => {
   try {
     console.log("Sending transactions to backend:", transactions); // Debugging
 
-    const response = await fetch("https://moneymatebackend.onrender.com/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transactions }),
-    });
+    // Loop through each transaction and send it individually
+    for (const transaction of transactions) {
+      const response = await fetch("https://money-mate-backend-lisa.onrender.com/transactions", {
+        method: "POST",
+        credentials: 'include', 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(transaction), // Send one transaction at a time
+      });
 
-    console.log("Response status:", response.status);
-    // console.log("Response URL:", response.url); 
+      console.log("Response status:", response.status);
 
-    if (response.ok) {
-      console.log("Transactions sent successfully", response);
-    } else {
-      console.error("Failed to send transactions");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to send transaction:", transaction, errorData);
+        throw new Error("Failed to send transaction");
+      }
+
+      const result = await response.json();
+      console.log("Transaction sent successfully:", result);
     }
   } catch (error) {
     console.error("Error sending data to backend:", error);
@@ -112,7 +137,7 @@ const MpesaReader = () => {
 
             // Parse and filter M-Pesa messages
             const mpesaMessages = messages
-              .map((msg) => parseMpesaMessage(msg.body)) // Parse each SMS body
+              .map((msg) => parseMpesaMessage(msg)) // Parse each SMS
               .filter(Boolean); // Remove null values (invalid M-Pesa messages)
 
             if (mpesaMessages.length > 0) {

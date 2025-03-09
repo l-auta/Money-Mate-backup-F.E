@@ -40,11 +40,11 @@ const TransactionList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch transaction data from backend
+  // Fetch transaction data from backend with a 30-second delay
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://moneymatebackend.onrender.com/transactions');
+        const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions');
         if (!response.ok) throw new Error('Failed to fetch transactions');
 
         const data = await response.json();
@@ -63,7 +63,13 @@ const TransactionList = () => {
       }
     };
 
-    fetchData();
+    const fetchDelay = 20000; // 20 seconds in milliseconds
+    const timer = setTimeout(() => {
+      fetchData();
+    }, fetchDelay);
+
+    // Cleanup the timer if the component unmounts
+    return () => clearTimeout(timer);
   }, []);
 
   // Optimize with useMemo
@@ -71,8 +77,18 @@ const TransactionList = () => {
   const monthHighest = useMemo(() => getHighestTransaction(monthTransactions), [monthTransactions]);
   const yearHighest = useMemo(() => getHighestTransaction(yearTransactions), [yearTransactions]);
 
-  if (loading) return <ActivityIndicator size="large" color="#6d2323" />;
-  if (error) return <Text style={styles.errorText}>Error: {error}</Text>;
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#6d2323" />
+        <Text>Loading transactions</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>Error: {error}</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -109,6 +125,11 @@ const styles = StyleSheet.create({
   transactionText: { fontSize: 16, color: '#333' },
   noTransactionText: { fontSize: 16, color: '#aaa' },
   errorText: { color: 'red', textAlign: 'center', marginTop: 20 },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default TransactionList;
