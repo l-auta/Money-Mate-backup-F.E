@@ -37,28 +37,28 @@ const requestSmsPermission = async () => {
 const parseMpesaDate = (timestamp) => {
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) {
-    throw new Error('Invalid date format');
+    throw new Error("Invalid date format");
   }
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     hour12: true,
   });
 };
 
 const formatAmount = (amount) => {
-  return parseFloat(amount).toFixed(1); // Ensure the amount has one decimal place
+  return parseFloat(amount).toFixed(1); // Ensure the amount has two decimal places
 };
 
 const parseMpesaMessage = (sms) => {
   console.log("Parsing SMS:", sms); // Debugging
 
   // Regex to match the amount
-  const amountMatch = sms.body.match(/Ksh\. (\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh. 60"
+  const amountMatch = sms.body.match(/Ksh(\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh60"
 
   // Determine transaction type
   const type = sms.body.includes("received") ? "received" : "sent";
@@ -86,12 +86,15 @@ const sendTransactionsToBackend = async (transactions) => {
 
     // Loop through each transaction and send it individually
     for (const transaction of transactions) {
-      const response = await fetch("https://money-mate-backend-lisa.onrender.com/transactions", {
-        method: "POST",
-        credentials: 'include', 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transaction), // Send one transaction at a time
-      });
+      const response = await fetch(
+        "https://money-mate-backend-lisa.onrender.com/transactions",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(transaction), // Send one transaction at a time
+        }
+      );
 
       console.log("Response status:", response.status);
 
@@ -119,7 +122,8 @@ const MpesaReader = () => {
 
       const filter = {
         box: "inbox", // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
-        address: "ETOPUP", // Filter by sender's phone number or shortcode
+        address: "MPESA", // Filter by sender's phone number or shortcode
+        maxCount: 100, // Limit the number of messages fetched to 100
       };
 
       SmsAndroid.list(
@@ -129,7 +133,6 @@ const MpesaReader = () => {
         },
         (count, smsList) => {
           console.log("Count: ", count); // Total number of SMS messages matching the filter
-          // console.log("List: ", smsList); // Raw JSON string of SMS messages
 
           try {
             const messages = JSON.parse(smsList); // Parse the JSON string into an array of objects
