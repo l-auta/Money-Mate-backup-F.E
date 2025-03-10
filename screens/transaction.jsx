@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import TransactionTable from "../components/TransactionTable"; 
@@ -7,18 +7,18 @@ import MoneyChart from "../components/MoneyChart";
 function Transactions({ transactions }) {
     return (
         <SafeAreaView style={styles.safeArea}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <View style={styles.container}>
                 <Text style={styles.welcome}>Your Transactions</Text>
 
                 <View style={styles.section}>
                     <TransactionTable />
                 </View>
 
-                <View style={styles.section}>
+                {/* <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Your Transaction Breakdown</Text>
                     <MoneyChart transactions={transactions} />
-                </View>
-            </ScrollView>
+                </View> */}
+            </View>
         </SafeAreaView>
     );
 }

@@ -12,7 +12,7 @@ const TransactionCards = () => {
   // Fetch transactions from the backend
   const fetchTransactions = async () => {
     try {
-      const response = await fetch('https://moneymatebackend.onrender.com/transactions');
+      const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions');
       if (!response.ok) {
         throw new Error('Failed to fetch transactions');
       }
@@ -45,19 +45,17 @@ const TransactionCards = () => {
     setTransferTotal(transferSum);
   };
 
-  // Fetch data on component mount
+  // Fetch data on component mount with a 30-second delay
   useEffect(() => {
-    fetchTransactions();
+    const fetchDelay = 20000; // 30 seconds in milliseconds
+    const timer = setTimeout(() => {
+      fetchTransactions();
+    }, fetchDelay);
+
+    // Cleanup the timer if the component unmounts
+    return () => clearTimeout(timer);
   }, []);
 
-  // Simulate adding a transaction manually (for testing)
-  const receiveTransaction = (transaction) => {
-    if (transaction.type === 'deposit') {
-      setDepositTotal((prev) => prev + transaction.amount);
-    } else if (transaction.type === 'transfer') {
-      setTransferTotal((prev) => prev + transaction.amount);
-    }
-  };
 
   // If still loading, show a spinner
   if (loading) {
@@ -91,21 +89,7 @@ const TransactionCards = () => {
           <Text style={styles.cardTitle}>Transfers Today</Text>
           <Text style={styles.cardAmount}>{transferTotal} Sh</Text>
         </Card>
-      </View>
-
-      {/* Simulate Transactions */}
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Simulate Deposit"
-          onPress={() => receiveTransaction({ type: 'deposit', amount: 100 })}
-          color="#6d2323"
-        />
-        <Button
-          title="Simulate Transfer"
-          onPress={() => receiveTransaction({ type: 'transfer', amount: 50 })}
-          color="#6d2323"
-        />
-      </View>
+      </View>  
     </View>
   );
 };

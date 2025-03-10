@@ -84,7 +84,7 @@ function SignUp({ navigation }) {
       }
 
       // Send a POST request to your backend
-      const response = await fetch("https://moneymatebackend.onrender.com/signup", {
+      const response = await fetch("https://money-mate-backend-lisa.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,7 +99,7 @@ function SignUp({ navigation }) {
         const data = await response.json();
         console.log("Backend response:", data);
         Alert.alert("Success", "Account created successfully!");
-        navigation.navigate("MainPage"); // Navigate to Login screen
+        navigation.navigate("LogIn"); // Navigate to Login screen
       } else {
         const errorData = await response.json();
         console.log("Backend error response:", errorData);

@@ -13,7 +13,7 @@ const LogIn = ({ navigation }) => {
     console.log("Data being sent to backend:", { username, password }); // Log the data
    
     try {
-      const response = await fetch('https://moneymatebackend.onrender.com/login', {
+      const response = await fetch('https://money-mate-backend-lisa.onrender.com/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const LogIn = ({ navigation }) => {
 
       // Handle the backend response
       if (result.success) {
-        const cookies = await CookieManager.get('https://moneymatebackend.onrender.com');
+        const cookies = await CookieManager.get('https://money-mate-backend-lisa.onrender.com');
         console.log('Cookies:', cookies);
         Alert.alert('Success', 'Logged in successfully'); // Show success message and navigate to the main screen
         navigation.replace('MainPage'); // Navigate to the main screen after successful login

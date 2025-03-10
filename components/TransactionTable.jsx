@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, FlatList, ActivityIndicator } from 'react-native';
-import { DataTable } from 'react-native-paper';
 
-// TransactionTable Component
 const TransactionTable = () => {
   const [transactions, setTransactions] = useState([]); 
   const [filteredTransactions, setFilteredTransactions] = useState([]); 
@@ -16,12 +14,20 @@ const TransactionTable = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch('https://moneymatebackend.onrender.com/transactions'); 
+        const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions'); 
         if (!response.ok) throw new Error('Failed to fetch transactions');
 
         const data = await response.json();
-        setTransactions(data);
-        setFilteredTransactions(data);
+        console.log('Fetched transactions:', data); // Log the data
+
+        // Generate unique keys for transactions without an id
+        const transactionsWithKeys = data.map((transaction, index) => ({
+          ...transaction,
+          key: transaction.id ? transaction.id.toString() : `temp-${index}`, // Generate a unique key
+        }));
+
+        setTransactions(transactionsWithKeys);
+        setFilteredTransactions(transactionsWithKeys);
       } catch (error) {
         console.error('Error fetching transactions:', error);
         setError('Failed to load transactions. Please try again.');
@@ -59,17 +65,17 @@ const TransactionTable = () => {
 
   // Render a transaction row
   const renderTransactionRow = ({ item }) => (
-    <DataTable.Row key={item.id}>
-      <DataTable.Cell>{item.date}</DataTable.Cell>
-      <DataTable.Cell>{item.type === 'sent' ? 'Sent' : 'Received'}</DataTable.Cell>
-      <DataTable.Cell>{item.amount} KSh</DataTable.Cell>
-    </DataTable.Row>
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.date}</Text>
+      <Text style={styles.cell}>{item.type === 'sent' ? 'Sent' : 'Received'}</Text>
+      <Text style={styles.cell}>{item.amount} KSh</Text>
+    </View>
   );
 
   // Show loading spinner while fetching
   if (loading) return <ActivityIndicator size="large" color="#6d2323" />;
 
-  //  Show error message if fetch fails
+  // Show error message if fetch fails
   if (error) return <Text style={styles.errorText}>{error}</Text>;
 
   return (
@@ -101,20 +107,20 @@ const TransactionTable = () => {
       </View>
 
       {/* Display Transaction Table */}
-      <DataTable style={styles.table}>
-        <DataTable.Header>
-          <DataTable.Title>Date</DataTable.Title>
-          <DataTable.Title>Type</DataTable.Title>
-          <DataTable.Title>Amount (KSh)</DataTable.Title>
-        </DataTable.Header>
+      <View style={styles.table}>
+        <View style={styles.headerRow}>
+          <Text style={styles.headerCell}>Date</Text>
+          <Text style={styles.headerCell}>Type</Text>
+          <Text style={styles.headerCell}>Amount (KSh)</Text>
+        </View>
 
         <FlatList
           data={filteredTransactions}
           renderItem={renderTransactionRow}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.key} // Use the key property
           ListEmptyComponent={<Text>No transactions found.</Text>}
         />
-      </DataTable>
+      </View>
     </View>
   );
 };
@@ -145,6 +151,28 @@ const styles = StyleSheet.create({
   },
   table: {
     marginTop: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+  },
+  headerCell: {
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  cell: {
+    flex: 1,
+    textAlign: 'center',
   },
   errorText: {
     color: 'red',
