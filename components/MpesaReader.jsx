@@ -20,7 +20,7 @@ const requestSmsPermission = async () => {
       // If the user denies permission, exit the app
       if (granted === PermissionsAndroid.RESULTS.DENIED) {
         console.log("SMS permission denied. Exiting app...");
-        BackHandler.exitApp(); // Exit the app
+        BackHandler.exitApp(); 
         return false;
       }
 
@@ -55,17 +55,17 @@ const formatAmount = (amount) => {
 };
 
 const parseMpesaMessage = (sms) => {
-  console.log("Parsing SMS:", sms); // Debugging
+  console.log("Parsing SMS:", sms); 
 
   // Regex to match the amount
-  const amountMatch = sms.body.match(/Ksh(\d+(?:,\d{3})*(?:\.\d{2})?)/i); // Match "Ksh60"
+  const amountMatch = sms.body.match(/Ksh(\d+(?:,\d{3})*(?:\.\d{2})?)/i); 
 
   // Determine transaction type
   const type = sms.body.includes("received") ? "received" : "sent";
 
   // If amount is not found, the SMS does not match the expected format
   if (!amountMatch) {
-    console.log("SMS does not match M-Pesa format:", sms.body); // Debugging
+    console.log("SMS does not match M-Pesa format:", sms.body);
     return null;
   }
 
@@ -82,7 +82,7 @@ const parseMpesaMessage = (sms) => {
 // Send parsed transactions to the backend
 const sendTransactionsToBackend = async (transactions) => {
   try {
-    console.log("Sending transactions to backend:", transactions); // Debugging
+    console.log("Sending transactions to backend:", transactions); 
 
     // Loop through each transaction and send it individually
     for (const transaction of transactions) {
@@ -92,7 +92,7 @@ const sendTransactionsToBackend = async (transactions) => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(transaction), // Send one transaction at a time
+          body: JSON.stringify(transaction), 
         }
       );
 
@@ -117,13 +117,13 @@ const MpesaReader = () => {
   useEffect(() => {
     const init = async () => {
       const hasPermission = await requestSmsPermission();
-      console.log("SMS permission granted:", hasPermission); // Debugging
+      console.log("SMS permission granted:", hasPermission); 
       if (!hasPermission) return;
 
       const filter = {
         box: "inbox", // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
         address: "MPESA", // Filter by sender's phone number or shortcode
-        maxCount: 100, // Limit the number of messages fetched to 100
+        maxCount: 100, 
       };
 
       SmsAndroid.list(
@@ -136,7 +136,7 @@ const MpesaReader = () => {
 
           try {
             const messages = JSON.parse(smsList); // Parse the JSON string into an array of objects
-            console.log("Parsed SMS messages:", messages); // Debugging
+            console.log("Parsed SMS messages:", messages); 
 
             // Parse and filter M-Pesa messages
             const mpesaMessages = messages
@@ -145,7 +145,7 @@ const MpesaReader = () => {
 
             if (mpesaMessages.length > 0) {
               console.log("Parsed M-Pesa messages:", mpesaMessages);
-              sendTransactionsToBackend(mpesaMessages); // Send parsed messages to the backend
+              sendTransactionsToBackend(mpesaMessages); 
             } else {
               console.log("No M-Pesa messages found.");
             }

@@ -72,7 +72,6 @@ const TransactionList = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Optimize with useMemo
   const dayHighest = useMemo(() => getHighestTransaction(dayTransactions), [dayTransactions]);
   const monthHighest = useMemo(() => getHighestTransaction(monthTransactions), [monthTransactions]);
   const yearHighest = useMemo(() => getHighestTransaction(yearTransactions), [yearTransactions]);

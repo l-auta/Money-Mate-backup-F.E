@@ -81,12 +81,12 @@ const TransactionCards = () => {
       {/* Transaction Summary Cards */}
       <View style={styles.cardsContainer}>
         <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Deposits Today</Text>
+          <Text style={styles.cardTitle}>Deposits</Text>
           <Text style={styles.cardAmount}>{depositTotal} Sh</Text>
         </Card>
 
         <Card style={styles.card}>
-          <Text style={styles.cardTitle}>Transfers Today</Text>
+          <Text style={styles.cardTitle}>Transfers</Text>
           <Text style={styles.cardAmount}>{transferTotal} Sh</Text>
         </Card>
       </View>  

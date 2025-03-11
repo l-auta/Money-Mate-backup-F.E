@@ -18,12 +18,12 @@ const TransactionTable = () => {
         if (!response.ok) throw new Error('Failed to fetch transactions');
 
         const data = await response.json();
-        console.log('Fetched transactions:', data); // Log the data
+        console.log('Fetched transactions:', data); 
 
         // Generate unique keys for transactions without an id
         const transactionsWithKeys = data.map((transaction, index) => ({
           ...transaction,
-          key: transaction.id ? transaction.id.toString() : `temp-${index}`, // Generate a unique key
+          key: transaction.id ? transaction.id.toString() : `temp-${index}`, 
         }));
 
         setTransactions(transactionsWithKeys);
@@ -117,7 +117,7 @@ const TransactionTable = () => {
         <FlatList
           data={filteredTransactions}
           renderItem={renderTransactionRow}
-          keyExtractor={(item) => item.key} // Use the key property
+          keyExtractor={(item) => item.key} 
           ListEmptyComponent={<Text>No transactions found.</Text>}
         />
       </View>
@@ -127,8 +127,10 @@ const TransactionTable = () => {
 
 // Styling
 const styles = StyleSheet.create({
-  container: {
+  container:
+  Advance-UI-and-Visualization
     marginBottom: 800,
+  main
     padding: 16,
   },
   header: {
