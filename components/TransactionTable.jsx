@@ -52,7 +52,7 @@ const TransactionTable = () => {
 
     // Filter by date (YYYY-MM-DD)
     if (searchDate) {
-      filtered = filtered.filter((transaction) => transaction.date === searchDate);
+      filtered = filtered.filter((transaction) => transaction.date.includes(searchDate));
     }
 
     // Filter by transaction type ('sent', 'received')
