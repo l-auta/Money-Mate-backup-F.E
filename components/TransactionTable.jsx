@@ -127,10 +127,8 @@ const TransactionTable = () => {
 
 // Styling
 const styles = StyleSheet.create({
-  container:
-  Advance-UI-and-Visualization
+  container: {
     marginBottom: 800,
-  main
     padding: 16,
   },
   header: {

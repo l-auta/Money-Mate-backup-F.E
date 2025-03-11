@@ -51,7 +51,7 @@ const parseMpesaDate = (timestamp) => {
 };
 
 const formatAmount = (amount) => {
-  return parseFloat(amount).toFixed(1); // Ensure the amount has two decimal places
+  return parseFloat(amount).toFixed(1); // Ensure the amount has one decimal places
 };
 
 const parseMpesaMessage = (sms) => {
