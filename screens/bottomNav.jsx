@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { BottomNavigation } from 'react-native-paper';
-import Dashboard from './dashBoard'; // Import Dashboard
-import Transactions from './transaction'; // Import Transactions
+import Dashboard from './dashBoard'; 
+import Transactions from './transaction'; 
 
 function BottomNav() {
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'dashboard', title: 'Dashboard' }, // No icon property
-    { key: 'transactions', title: 'Transactions' }, // No icon property
+    { key: 'dashboard', title: 'Dashboard' }, 
+    { key: 'transactions', title: 'Transactions' },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
@@ -19,17 +19,17 @@ function BottomNav() {
     <BottomNavigation
       navigationState={{ index, routes }}
       onIndexChange={setIndex}
-      renderScene={renderScene} // Use the renderScene map for dynamic tab content
+      renderScene={renderScene} 
       activeColor="#6d2323" // Active tab color
       inactiveColor="#a04747" // Inactive tab color
       barStyle={{
-        backgroundColor: '#fffefb', // Background color of the navigation bar
-        height: 70, // Height of the navigation bar
-        paddingBottom: 10, // Padding at the bottom
-        borderTopWidth: 1, // Add a border at the top
-        borderTopColor: '#e0e0e0', // Light gray border color
+        backgroundColor: '#fffefb', 
+        height: 70, 
+        paddingBottom: 10, 
+        borderTopWidth: 1, 
+        borderTopColor: '#e0e0e0', 
       }}
-      labeled={true} // Show labels for the tabs
+      labeled={true} 
     />
   );
 }

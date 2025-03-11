@@ -99,7 +99,7 @@ function SignUp({ navigation }) {
         const data = await response.json();
         console.log("Backend response:", data);
         Alert.alert("Success", "Account created successfully!");
-        navigation.navigate("LogIn"); // Navigate to Login screen
+        navigation.navigate("LogIn"); 
       } else {
         const errorData = await response.json();
         console.log("Backend error response:", errorData);
