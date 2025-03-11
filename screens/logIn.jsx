@@ -10,7 +10,7 @@ const LogIn = ({ navigation }) => {
 
   
   const sendLoginData = async (username, password) => {
-    console.log("Data being sent to backend:", { username, password }); // Log the data
+    console.log("Data being sent to backend:", { username, password }); 
    
     try {
       const response = await fetch('https://money-mate-backend-1-bs54.onrender.com/login', {
@@ -18,7 +18,7 @@ const LogIn = ({ navigation }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }), // Send username and password as JSON
+        body: JSON.stringify({ username, password }), 
         credentials: 'include',
       });
 
@@ -51,7 +51,7 @@ const LogIn = ({ navigation }) => {
       if (result.success) {
         const cookies = await CookieManager.get('https://money-mate-backend-1-bs54.onrender.com');
         console.log('Cookies:', cookies);
-        Alert.alert('Success', 'Logged in successfully'); // Show success message and navigate to the main screen
+        Alert.alert('Success', 'Logged in successfully'); 
         navigation.replace('MainPage'); // Navigate to the main screen after successful login
       } else {
         Alert.alert('Error', result.message || 'Invalid username or password');

@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#6d2323', // Primary color
     marginBottom: 10,
-    textTransform: 'uppercase', // Uppercase for a modern look
-    letterSpacing: 2, // Add spacing between letters
+    textTransform: 'uppercase', 
+    letterSpacing: 2, 
   },
   line: {
     width: 100,
