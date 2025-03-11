@@ -4,6 +4,7 @@ import TransactionCards from "../components/transactionCards";
 import MoneyChart from "../components/MoneyChart";
 import TransactionList from "../components/highTransactions";
 import React from "react";
+import SpendingInsights from "../components/SpendingInsights";
 
 function Dashboard({ transactions }) {
   return (
@@ -31,6 +32,15 @@ function Dashboard({ transactions }) {
           <Text style={styles.sectionTitle}>Top Highest Transactions:</Text>
           <TransactionList />
         </View>
+
+        {/* Spending Insights */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Spending Insights:</Text>
+          <SpendingInsights />
+        </View>
+
+
+
       </ScrollView>
     </SafeAreaView>
   );
