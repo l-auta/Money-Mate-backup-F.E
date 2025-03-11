@@ -127,7 +127,10 @@ const TransactionTable = () => {
 
 // Styling
 const styles = StyleSheet.create({
-  container: {
+  container:
+  Advance-UI-and-Visualization
+    marginBottom: 800,
+  main
     padding: 16,
   },
   header: {
@@ -139,6 +142,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
+    color: 'black',
     borderColor: '#ddd',
     padding: 10,
     marginBottom: 10,
@@ -150,7 +154,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   table: {
-    marginTop: 20,
+    marginTop: 10,
+    marginBottom: 30,
+    paddingBottom: 20,
   },
   headerRow: {
     flexDirection: 'row',
