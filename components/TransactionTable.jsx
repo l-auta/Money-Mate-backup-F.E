@@ -128,6 +128,8 @@ const TransactionTable = () => {
 // Styling
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    marginBottom: 10,
     padding: 16,
   },
   header: {
