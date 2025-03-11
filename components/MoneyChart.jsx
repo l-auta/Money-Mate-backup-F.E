@@ -57,7 +57,7 @@ const MoneyChart = () => {
     if (transactions.length === 0) return;
 
     const monthlyData = categorizeTransactions(transactions);
-    const labels = Object.keys(monthlyData).sort(); // Month labels
+    const labels = Object.keys(monthlyData).sort(); 
     const incomeData = labels.map((month) => monthlyData[month].income);
     const expenseData = labels.map((month) => monthlyData[month].expense);
 
