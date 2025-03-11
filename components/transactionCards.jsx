@@ -47,7 +47,7 @@ const TransactionCards = () => {
 
   // Fetch data on component mount with a 30-second delay
   useEffect(() => {
-    const fetchDelay = 20000; // 30 seconds in milliseconds
+    const fetchDelay = 20000; // 20 seconds in milliseconds
     const timer = setTimeout(() => {
       fetchTransactions();
     }, fetchDelay);
