@@ -14,7 +14,7 @@ const TransactionTable = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions'); 
+        const response = await fetch('https://money-mate-backend-1-bs54.onrender.com/transactions'); 
         if (!response.ok) throw new Error('Failed to fetch transactions');
 
         const data = await response.json();
@@ -127,10 +127,8 @@ const TransactionTable = () => {
 
 // Styling
 const styles = StyleSheet.create({
-  container:
-  Advance-UI-and-Visualization
+  container: {
     marginBottom: 800,
-  main
     padding: 16,
   },
   header: {
