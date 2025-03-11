@@ -12,7 +12,7 @@ const TransactionCards = () => {
   // Fetch transactions from the backend
   const fetchTransactions = async () => {
     try {
-      const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions');
+      const response = await fetch('https://money-mate-backend-1-bs54.onrender.com/transactions');
       if (!response.ok) {
         throw new Error('Failed to fetch transactions');
       }

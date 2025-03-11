@@ -84,7 +84,7 @@ function SignUp({ navigation }) {
       }
 
       // Send a POST request to your backend
-      const response = await fetch("https://money-mate-backend-lisa.onrender.com/signup", {
+      const response = await fetch("https://money-mate-backend-1-bs54.onrender.com/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -87,7 +87,7 @@ const sendTransactionsToBackend = async (transactions) => {
     // Loop through each transaction and send it individually
     for (const transaction of transactions) {
       const response = await fetch(
-        "https://money-mate-backend-lisa.onrender.com/transactions",
+        "https://money-mate-backend-1-bs54.onrender.com/transactions",
         {
           method: "POST",
           credentials: "include",
