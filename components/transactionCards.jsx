@@ -1,40 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { Card } from 'react-native-paper';
 
-// Simulate receiving new transactions
+// TransactionCards Component
 const TransactionCards = () => {
-  // State to track the total amounts for deposits and transfers
   const [depositTotal, setDepositTotal] = useState(0);
   const [transferTotal, setTransferTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Simulate receiving a new transaction
-  const receiveTransaction = (transaction) => {
-    if (transaction.type === 'deposit') {
-      setDepositTotal((prevAmount) => prevAmount + transaction.amount);
-    } else if (transaction.type === 'transfer') {
-      setTransferTotal((prevAmount) => prevAmount + transaction.amount);
+  // Fetch transactions from the backend
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions');
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+      const data = await response.json();
+
+      // Process and update totals
+      calculateTotals(data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      setError('Failed to load transactions.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Example to simulate receiving new deposits and transfers
-  useEffect(() => {
-    // Simulate receiving a deposit after 3 seconds
-    setTimeout(() => {
-      const newTransaction = { type: 'deposit', amount: 10 }; // Simulated deposit
-      receiveTransaction(newTransaction);
-    }, 3000); // 3 seconds delay for deposit
+  // Calculate deposit and transfer totals from transactions
+  const calculateTotals = (transactions) => {
+    let depositSum = 0;
+    let transferSum = 0;
 
-    // Simulate receiving a transfer after 6 seconds
-    setTimeout(() => {
-      const newTransaction = { type: 'transfer', amount: 5 }; // Simulated transfer
-      receiveTransaction(newTransaction);
-    }, 6000); // 6 seconds delay for transfer
+    transactions.forEach((transaction) => {
+      if (transaction.type === 'received') {
+        depositSum += transaction.amount;
+      } else if (transaction.type === 'sent') {
+        transferSum += transaction.amount;
+      }
+    });
+
+    setDepositTotal(depositSum);
+    setTransferTotal(transferSum);
+  };
+
+  // Fetch data on component mount with a 30-second delay
+  useEffect(() => {
+    const fetchDelay = 20000; // 30 seconds in milliseconds
+    const timer = setTimeout(() => {
+      fetchTransactions();
+    }, fetchDelay);
+
+    // Cleanup the timer if the component unmounts
+    return () => clearTimeout(timer);
   }, []);
+
+
+  // If still loading, show a spinner
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#6d2323" />
+        <Text>Loading transactions...</Text>
+      </View>
+    );
+  }
+
+  // If there's an error, display it
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Container with flexDirection: 'row' to align cards side by side */}
+      {/* Transaction Summary Cards */}
       <View style={styles.cardsContainer}>
         <Card style={styles.card}>
           <Text style={styles.cardTitle}>Deposits Today</Text>
@@ -45,25 +89,12 @@ const TransactionCards = () => {
           <Text style={styles.cardTitle}>Transfers Today</Text>
           <Text style={styles.cardAmount}>{transferTotal} Sh</Text>
         </Card>
-      </View>
-
-      {/* Buttons to manually simulate transactions */}
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Simulate Deposit"
-          onPress={() => receiveTransaction({ type: 'deposit', amount: 10 })}
-          color="#6d2323"
-        />
-        <Button
-          title="Simulate Transfer"
-          onPress={() => receiveTransaction({ type: 'transfer', amount: 5 })}
-          color="#6d2323"
-        />
-      </View>
+      </View>  
     </View>
   );
 };
 
+// Styling
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -72,35 +103,48 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     flexDirection: 'row', // Align cards side by side
-    justifyContent: 'space-between', // Add space between the cards
+    justifyContent: 'space-between',
     marginBottom: 20,
   },
   card: {
-    flex: 1, // Makes each card take up equal width
-    marginRight: 10, // Space between the two cards
+    flex: 1,
+    marginRight: 10,
     padding: 20,
-    borderRadius: 10, // Rounded corners
-    backgroundColor: '#fff', // White background for cards
-    shadowColor: '#000', // Shadow for depth
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3, // Elevation for Android
+    elevation: 3, // For Android shadow
   },
   cardTitle: {
     fontSize: 18,
-    color: '#6d2323', // Use the provided color for titles
-    fontWeight: '600', // Semi-bold for titles
-    marginBottom: 10, // Space between title and amount
+    color: '#6d2323',
+    fontWeight: '600',
+    marginBottom: 10,
   },
   cardAmount: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333', // Darker color for amounts
+    color: '#333',
   },
   buttonContainer: {
     marginTop: 20,
-    gap: 10, // Space between buttons
+    gap: 10,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
 });
 

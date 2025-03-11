@@ -1,10 +1,12 @@
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionCards from "../components/transactionCards";
+import MoneyChart from "../components/MoneyChart";
 import TransactionList from "../components/highTransactions";
 import React from "react";
+import SpendingInsights from "../components/SpendingInsights";
 
-function Dashboard() {
+function Dashboard({ transactions }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -19,12 +21,10 @@ function Dashboard() {
           <TransactionCards />
         </View>
 
-        {/* Chart Section */}
+        {/* Money In/Out Chart */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Your Transaction Breakdown:</Text>
-          <View style={styles.chartPlaceholder}>
-            <Text style={styles.chartText}>Chart Placeholder</Text>
-          </View>
+          <MoneyChart />
         </View>
 
         {/* Top Transactions */}
@@ -32,6 +32,15 @@ function Dashboard() {
           <Text style={styles.sectionTitle}>Top Highest Transactions:</Text>
           <TransactionList />
         </View>
+
+        {/* Spending Insights */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Spending Insights:</Text>
+          <SpendingInsights />
+        </View>
+
+
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -40,7 +49,7 @@ function Dashboard() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f0e5', // Light background color
+    backgroundColor: "#f8f0e5", // Light background color
   },
   scrollContainer: {
     padding: 20,
@@ -50,16 +59,16 @@ const styles = StyleSheet.create({
   },
   welcome: {
     fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#6d2323', // Primary color
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#6d2323", // Primary color
   },
   section: {
     marginBottom: 30,
-    backgroundColor: '#fff', // White background for sections
+    backgroundColor: "#fff", // White background for sections
     borderRadius: 10,
     padding: 15,
-    shadowColor: '#000', // Shadow for depth
+    shadowColor: "#000", // Shadow for depth
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -67,20 +76,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#6d2323', // Primary color
+    fontWeight: "bold",
+    color: "#6d2323", // Primary color
     marginBottom: 15,
-  },
-  chartPlaceholder: {
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5', // Light gray background for chart placeholder
-    borderRadius: 10,
-  },
-  chartText: {
-    fontSize: 18,
-    color: '#a04747', // Secondary color
   },
 });
 

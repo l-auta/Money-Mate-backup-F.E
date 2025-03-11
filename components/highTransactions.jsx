@@ -1,115 +1,134 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Card } from 'react-native-paper'; // Using react-native-paper Card component
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { Card } from 'react-native-paper';
+
+// Helper function to get the highest transaction
+const getHighestTransaction = (transactions) => {
+  if (!transactions || transactions.length === 0) return null;
+
+  const validTransactions = transactions.filter(
+    (transaction) => typeof transaction.amount === 'number' && transaction.amount > 0
+  );
+
+  if (validTransactions.length === 0) return null;
+
+  return validTransactions.reduce((max, transaction) =>
+    transaction.amount > max.amount ? transaction : max
+  );
+};
+
+// Helper function to categorize transactions (day, month, year)
+const categorizeTransactions = (transactions) => {
+  const today = new Date();
+  const isSameDay = (date) => new Date(date).toDateString() === today.toDateString();
+  const isSameMonth = (date) =>
+    new Date(date).getMonth() === today.getMonth() &&
+    new Date(date).getFullYear() === today.getFullYear();
+  const isSameYear = (date) => new Date(date).getFullYear() === today.getFullYear();
+
+  return {
+    dayTransactions: transactions.filter((t) => isSameDay(t.date)),
+    monthTransactions: transactions.filter((t) => isSameMonth(t.date)),
+    yearTransactions: transactions.filter((t) => isSameYear(t.date)),
+  };
+};
 
 const TransactionList = () => {
   const [dayTransactions, setDayTransactions] = useState([]);
   const [monthTransactions, setMonthTransactions] = useState([]);
   const [yearTransactions, setYearTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Simulated data for demonstration
+  // Fetch transaction data from backend with a 30-second delay
   useEffect(() => {
-    // Simulate fetching data for day, month, and year
-    setTimeout(() => {
-      setDayTransactions([{ amount: 1500 }, { amount: 2000 }, { amount: 1000 }]);
-      setMonthTransactions([{ amount: 5000 }, { amount: 7000 }, { amount: 3000 }]);
-      setYearTransactions([{ amount: 15000 }, { amount: 20000 }, { amount: 10000 }]);
-    }, 1000); // Simulate a 1-second delay
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://money-mate-backend-lisa.onrender.com/transactions');
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+
+        const data = await response.json();
+
+        // Categorize transactions into day, month, year
+        const { dayTransactions, monthTransactions, yearTransactions } = categorizeTransactions(data);
+
+        setDayTransactions(dayTransactions);
+        setMonthTransactions(monthTransactions);
+        setYearTransactions(yearTransactions);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchDelay = 20000; // 20 seconds in milliseconds
+    const timer = setTimeout(() => {
+      fetchData();
+    }, fetchDelay);
+
+    // Cleanup the timer if the component unmounts
+    return () => clearTimeout(timer);
   }, []);
 
-  // Get highest transaction for each category (Day, Month, Year)
-  const getHighestTransaction = (transactions) => {
-    if (!transactions || transactions.length === 0) return null;
-    return transactions.reduce((max, transaction) => {
-      return transaction.amount > max.amount ? transaction : max;
-    });
-  };
+  // Optimize with useMemo
+  const dayHighest = useMemo(() => getHighestTransaction(dayTransactions), [dayTransactions]);
+  const monthHighest = useMemo(() => getHighestTransaction(monthTransactions), [monthTransactions]);
+  const yearHighest = useMemo(() => getHighestTransaction(yearTransactions), [yearTransactions]);
 
-  const dayHighest = getHighestTransaction(dayTransactions);
-  const monthHighest = getHighestTransaction(monthTransactions);
-  const yearHighest = getHighestTransaction(yearTransactions);
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#6d2323" />
+        <Text>Loading transactions</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return <Text style={styles.errorText}>Error: {error}</Text>;
+  }
 
   return (
     <View style={styles.container}>
       <Card style={styles.card}>
         <Text style={styles.header}>Highest Transactions Summary</Text>
 
-        <View style={styles.transactionSection}>
-          <Text style={styles.sectionHeader}>Today</Text>
-          {dayHighest ? (
-            <Text style={styles.transactionText}>Amount: {dayHighest.amount} Shillings</Text>
-          ) : (
-            <Text style={styles.noTransactionText}>No transactions for today</Text>
-          )}
-        </View>
-
-        <View style={styles.transactionSection}>
-          <Text style={styles.sectionHeader}>This Month</Text>
-          {monthHighest ? (
-            <Text style={styles.transactionText}>Amount: {monthHighest.amount} Shillings</Text>
-          ) : (
-            <Text style={styles.noTransactionText}>No transactions this month</Text>
-          )}
-        </View>
-
-        <View style={styles.transactionSection}>
-          <Text style={styles.sectionHeader}>This Year</Text>
-          {yearHighest ? (
-            <Text style={styles.transactionText}>Amount: {yearHighest.amount} Shillings</Text>
-          ) : (
-            <Text style={styles.noTransactionText}>No transactions this year</Text>
-          )}
-        </View>
+        {[
+          { label: "Today", data: dayHighest },
+          { label: "This Month", data: monthHighest },
+          { label: "This Year", data: yearHighest },
+        ].map((item, index) => (
+          <View key={index} style={styles.transactionSection}>
+            <Text style={styles.sectionHeader}>{item.label}</Text>
+            {item.data ? (
+              <Text style={styles.transactionText}>Amount: {item.data.amount} KSh</Text>
+            ) : (
+              <Text style={styles.noTransactionText}>
+                No transactions for {item.label.toLowerCase()}
+              </Text>
+            )}
+          </View>
+        ))}
       </Card>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: { padding: 16 },
+  card: { padding: 20, elevation: 3 },
+  header: { fontSize: 22, fontWeight: 'bold', marginBottom: 20 },
+  transactionSection: { marginBottom: 20 },
+  sectionHeader: { fontSize: 18, fontWeight: '600' },
+  transactionText: { fontSize: 16, color: '#333' },
+  noTransactionText: { fontSize: 16, color: '#aaa' },
+  errorText: { color: 'red', textAlign: 'center', marginTop: 20 },
+  loaderContainer: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#f5f5f5', // Light background for contrast
-  },
-  card: {
-    padding: 20,
-    elevation: 3,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000', // Shadow for depth
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#6d2323', // Use the provided color for the header
-    textAlign: 'center', // Center-align the header
-  },
-  transactionSection: {
-    marginBottom: 20,
-    padding: 15,
-    backgroundColor: '#f9f9f9', // Light background for each section
-    borderRadius: 8,
-    borderLeftWidth: 4, // Add a colored border to the left
-    borderLeftColor: '#6d2323', // Use the provided color for the border
-  },
-  sectionHeader: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333', // Darker color for section headers
-  },
-  transactionText: {
-    fontSize: 14,
-    color: '#555', // Slightly lighter color for transaction text
-  },
-  noTransactionText: {
-    fontSize: 14,
-    color: '#999', // Lighter color for "no transactions" text
-    fontStyle: 'italic', // Italicize for emphasis
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
