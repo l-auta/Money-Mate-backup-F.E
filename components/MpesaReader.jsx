@@ -123,7 +123,7 @@ const MpesaReader = () => {
       const filter = {
         box: "inbox", // 'inbox' (default), 'sent', 'draft', 'outbox', 'failed', 'queued', and '' for all
         address: "MPESA", // Filter by sender's phone number or shortcode
-        maxCount: 100, 
+        maxCount: 150, 
       };
 
       SmsAndroid.list(
