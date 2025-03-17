@@ -63,7 +63,7 @@ const TransactionList = () => {
       }
     };
 
-    const fetchDelay = 20000; // 20 seconds in milliseconds
+    const fetchDelay = 10000; // 10 seconds in milliseconds
     const timer = setTimeout(() => {
       fetchData();
     }, fetchDelay);
