@@ -45,9 +45,9 @@ const TransactionCards = () => {
     setTransferTotal(transferSum);
   };
 
-  // Fetch data on component mount with a 30-second delay
+  // Fetch data on component mount with a 10-second delay
   useEffect(() => {
-    const fetchDelay = 20000; // 20 seconds in milliseconds
+    const fetchDelay = 10000; // 10 seconds in milliseconds
     const timer = setTimeout(() => {
       fetchTransactions();
     }, fetchDelay);
